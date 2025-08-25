@@ -31,3 +31,20 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Application Configuration ###
+# Ignore sensitive configuration files
+src/main/resources/application.properties
+src/main/resources/application-*.properties
+
+# Ignore environment-specific files
+.env
+*.env
+
+# Ignore log files
+logs/
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp

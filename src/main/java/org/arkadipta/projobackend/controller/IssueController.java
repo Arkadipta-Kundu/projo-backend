@@ -76,7 +76,7 @@ public class IssueController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build() ;
+            return ResponseEntity.badRequest().build();
         }
     }
 

@@ -1,0 +1,1589 @@
+{
+  "info": {
+    "name": "Projo Backend API - Complete Collection (With Email Verification + Issues + Notes + Collaboration)",
+    "description": "Complete API collection for Projo Backend including Authentication, CRUD operations, Caching, Email Verification, Issues Management, Notes Management with Privacy Controls, and Collaboration Features",
+    "version": "3.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 Authentication & Email Verification",
+      "item": [
+        {
+          "name": "Register User (Sends Verification Email)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"{{test_username}}\",\n    \"fullName\": \"{{test_fullname}}\",\n    \"email\": \"{{test_email}}\",\n    \"password\": \"{{test_password}}\",\n    \"confirmPassword\": \"{{test_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Email with OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{test_email}}\",\n    \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/verify-email",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "verify-email"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resend Verification OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{test_email}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/resend-verification-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "resend-verification-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User (Requires Email Verification)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (responseCode.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.token) {",
+                  "        pm.environment.set('auth_token', response.token);",
+                  "        console.log('JWT Token saved to environment: ' + response.token.substring(0, 20) + '...');",
+                  "        console.log('User logged in: ' + response.user.username);",
+                  "    } else {",
+                  "        console.log('Login failed: No token in response');",
+                  "    }",
+                  "} else {",
+                  "    console.log('Login request failed with status: ' + responseCode.code);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"{{test_username}}\",\n    \"password\": \"{{test_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password (Sends Reset OTP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{test_email}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/forgot-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "forgot-password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password with OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{test_email}}\",\n    \"otp\": \"123456\",\n    \"newPassword\": \"newpassword123\",\n    \"confirmPassword\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/reset-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "reset-password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/validate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "validate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (responseCode.code === 200) {",
+                  "    pm.environment.unset('auth_token');",
+                  "    console.log('Auth token cleared from environment');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Projects API",
+      "item": [
+        {
+          "name": "Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (responseCode.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data && response.data.id) {",
+                  "        pm.environment.set('project_id', response.data.id);",
+                  "        console.log('Project ID saved: ' + response.data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"{{project_title}}\",\n    \"description\": \"{{project_description}}\",\n    \"deadline\": \"{{project_deadline}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Projects (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project by ID (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Project (Evicts Cache)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated {{project_title}}\",\n    \"description\": \"Updated {{project_description}}\",\n    \"deadline\": \"{{project_deadline}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Projects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/search?query=test",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "test"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Project (Evicts Cache)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "✅ Tasks API",
+      "item": [
+        {
+          "name": "Create Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (responseCode.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data && response.data.id) {",
+                  "        pm.environment.set('task_id', response.data.id);",
+                  "        console.log('Task ID saved: ' + response.data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"{{task_title}}\",\n    \"description\": \"{{task_description}}\",\n    \"priority\": \"{{task_priority}}\",\n    \"projectId\": {{project_id}},\n    \"dueDate\": \"{{task_due_date}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Tasks (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Task by ID (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/{{task_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "{{task_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Task Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/{{task_id}}/status?status=IN_PROGRESS",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "{{task_id}}", "status"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "IN_PROGRESS"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tasks by Project",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/project/{{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "project", "{{project_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "⚡ Cache Management",
+      "item": [
+        {
+          "name": "Cache Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cache/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Cache Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cache/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clear All Caches",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cache/clear",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "clear"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Projects Cache",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cache/clear/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "clear", "projects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Tasks Cache",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cache/clear/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "clear", "tasks"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "⏰ Task Reminders API",
+      "item": [
+        {
+          "name": "Set Custom Reminder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reminderTime\": \"2025-08-26T15:30:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tasks/reminders/{{task_id}}/custom",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "reminders", "{{task_id}}", "custom"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Custom Reminder (Query Params)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/reminders/{{task_id}}/set?reminderTime=2025-08-26T16:00:00",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "reminders", "{{task_id}}", "set"],
+              "query": [
+                {
+                  "key": "reminderTime",
+                  "value": "2025-08-26T16:00:00"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Disable Task Reminders",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/reminders/{{task_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "reminders", "{{task_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "🔧 Manual Trigger Deadline Reminders (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/reminders/trigger/deadline",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "reminders", "trigger", "deadline"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "🔧 Manual Trigger Custom Reminders (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/reminders/trigger/custom",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "reminders", "trigger", "custom"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "🔧 Manual Trigger Overdue Check (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/reminders/trigger/overdue",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "reminders", "trigger", "overdue"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "� Issues Management",
+      "item": [
+        {
+          "name": "Create Issue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('issue_id', response.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Sample Issue - {{timestamp}}\",\n    \"description\": \"This is a test issue created from Postman\",\n    \"severity\": \"MEDIUM\",\n    \"projectId\": {{project_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/issues",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Issues (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues?page=0&size=10&sortBy=createdAt&sortDir=desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDir",
+                  "value": "desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Issue by ID (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "{{issue_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Issue",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated Issue - {{timestamp}}\",\n    \"description\": \"This issue has been updated\",\n    \"severity\": \"HIGH\",\n    \"status\": \"IN_PROGRESS\",\n    \"projectId\": {{project_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "{{issue_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Issues by Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues?status=OPEN&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "OPEN"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Issues by Project",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues?projectId={{project_id}}&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"],
+              "query": [
+                {
+                  "key": "projectId",
+                  "value": "{{project_id}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Issues",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues?search=bug&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "bug"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Issue Statistics (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues/statistics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "statistics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Issue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "{{issue_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📝 Notes Management",
+      "item": [
+        {
+          "name": "Create Public Note",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('note_id', response.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"This is a public note created from Postman - {{timestamp}}\",\n    \"projectId\": {{project_id}},\n    \"isPrivate\": false,\n    \"isCollaborative\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Private Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"This is a private note - {{timestamp}}\",\n    \"projectId\": {{project_id}},\n    \"isPrivate\": true,\n    \"isCollaborative\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Collaborative Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"This is a collaborative note - {{timestamp}}\",\n    \"projectId\": {{project_id}},\n    \"isPrivate\": false,\n    \"isCollaborative\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Personal Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"This is a personal note without project - {{timestamp}}\",\n    \"isPrivate\": true,\n    \"isCollaborative\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Accessible Notes (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notes?page=0&size=10&sortBy=createdAt&sortDir=desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDir",
+                  "value": "desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Note by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notes/{{note_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes", "{{note_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Notes by Project",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notes?projectId={{project_id}}&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes"],
+              "query": [
+                {
+                  "key": "projectId",
+                  "value": "{{project_id}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Notes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notes?search=important&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "important"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"Updated note content - {{timestamp}}\",\n    \"projectId\": {{project_id}},\n    \"isPrivate\": false,\n    \"isCollaborative\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notes/{{note_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes", "{{note_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Note Statistics (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notes/statistics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes", "statistics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Note",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notes/{{note_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notes", "{{note_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🤝 Collaboration Management",
+      "item": [
+        {
+          "name": "Invite User to Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('membership_id', response.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"projectId\": {{project_id}},\n    \"email\": \"collaborator@example.com\",\n    \"message\": \"You are invited to collaborate on this project\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/collaboration/invite",
+              "host": ["{{base_url}}"],
+              "path": ["api", "collaboration", "invite"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Respond to Invitation - Accept",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/collaboration/invites/{{membership_id}}/respond?response=ACCEPTED",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "collaboration",
+                "invites",
+                "{{membership_id}}",
+                "respond"
+              ],
+              "query": [
+                {
+                  "key": "response",
+                  "value": "ACCEPTED"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Respond to Invitation - Decline",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/collaboration/invites/{{membership_id}}/respond?response=DECLINED",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "collaboration",
+                "invites",
+                "{{membership_id}}",
+                "respond"
+              ],
+              "query": [
+                {
+                  "key": "response",
+                  "value": "DECLINED"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project Members (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/collaboration/projects/{{project_id}}/members",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "collaboration",
+                "projects",
+                "{{project_id}}",
+                "members"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Project Memberships (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/collaboration/my-memberships",
+              "host": ["{{base_url}}"],
+              "path": ["api", "collaboration", "my-memberships"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Invitations (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/collaboration/pending-invites",
+              "host": ["{{base_url}}"],
+              "path": ["api", "collaboration", "pending-invites"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Member from Project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/collaboration/projects/{{project_id}}/members/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "collaboration",
+                "projects",
+                "{{project_id}}",
+                "members",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Leave Project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/collaboration/projects/{{project_id}}/leave",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "collaboration",
+                "projects",
+                "{{project_id}}",
+                "leave"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Collaboration Statistics (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/collaboration/statistics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "collaboration", "statistics"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "�📈 Dashboard API",
+      "item": [
+        {
+          "name": "Get Dashboard Data (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["api", "dashboard"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-set timestamp for dynamic data",
+          "const timestamp = new Date().getTime();",
+          "pm.environment.set('timestamp', timestamp);",
+          "",
+          "// Set default test values if not already set",
+          "if (!pm.environment.get('test_username')) {",
+          "    pm.environment.set('test_username', 'testuser' + timestamp.toString().slice(-6));",
+          "}",
+          "if (!pm.environment.get('test_email')) {",
+          "    pm.environment.set('test_email', 'test' + timestamp.toString().slice(-6) + '@example.com');",
+          "}",
+          "if (!pm.environment.get('test_fullname')) {",
+          "    pm.environment.set('test_fullname', 'Test User');",
+          "}",
+          "if (!pm.environment.get('test_password')) {",
+          "    pm.environment.set('test_password', 'TestPass123!');",
+          "}",
+          "if (!pm.environment.get('project_title')) {",
+          "    pm.environment.set('project_title', 'Test Project - ' + timestamp);",
+          "}",
+          "if (!pm.environment.get('project_description')) {",
+          "    pm.environment.set('project_description', 'This is a test project created from Postman');",
+          "}",
+          "if (!pm.environment.get('project_deadline')) {",
+          "    const futureDate = new Date();",
+          "    futureDate.setDate(futureDate.getDate() + 30);",
+          "    pm.environment.set('project_deadline', futureDate.toISOString().split('T')[0]);",
+          "}",
+          "if (!pm.environment.get('base_url')) {",
+          "    pm.environment.set('base_url', 'http://localhost:8080');",
+          "}"
+        ]
+      }
+    }
+  ]
+}

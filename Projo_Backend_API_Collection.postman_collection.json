@@ -1,0 +1,791 @@
+{
+  "info": {
+    "name": "Projo Backend API with Redis Caching",
+    "description": "Complete API collection for testing Projo Backend with Redis caching functionality",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Registration successful\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"rememberMe\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Login successful\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    pm.expect(response.token).to.not.be.empty;",
+                  "    ",
+                  "    // Set token for subsequent requests",
+                  "    pm.environment.set(\"jwt_token\", response.token);",
+                  "    pm.environment.set(\"user_id\", response.user.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sample Project\",\n  \"description\": \"This is a test project for demonstration\",\n  \"deadline\": \"2025-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Project created successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.id).to.not.be.undefined;",
+                  "    pm.environment.set(\"project_id\", response.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Projects (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects?page=0&size=10&sortBy=createdAt&sortDir=desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDir",
+                  "value": "desc"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": ["pm.globals.set(\"startTime\", Date.now());"]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response time reasonable for cached data\", function () {",
+                  "    const endTime = Date.now();",
+                  "    const startTime = pm.globals.get(\"startTime\");",
+                  "    const responseTime = endTime - startTime;",
+                  "    ",
+                  "    console.log(\"Response time: \" + responseTime + \"ms\");",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Project by ID (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Project (Cache Eviction)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Project Title\",\n  \"description\": \"Updated project description\",\n  \"deadline\": \"2025-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Project updated successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    console.log(\"Cache should be evicted after update\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sample Task\",\n  \"description\": \"This is a test task\",\n  \"startDate\": \"2025-08-25\",\n  \"dueDate\": \"2025-08-30\",\n  \"priority\": \"HIGH\",\n  \"status\": \"TODO\",\n  \"projectId\": {{project_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Task created successfully\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.id).to.not.be.undefined;",
+                  "    pm.environment.set(\"task_id\", response.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Tasks Kanban (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/kanban?projectId={{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "kanban"],
+              "query": [
+                {
+                  "key": "projectId",
+                  "value": "{{project_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Tasks Gantt (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/gantt?projectId={{project_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "gantt"],
+              "query": [
+                {
+                  "key": "projectId",
+                  "value": "{{project_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Tasks Calendar (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/calendar?start=2025-08-01&end=2025-08-31",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "calendar"],
+              "query": [
+                {
+                  "key": "start",
+                  "value": "2025-08-01"
+                },
+                {
+                  "key": "end",
+                  "value": "2025-08-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Task Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tasks/{{task_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "{{task_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Start Task Timer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/{{task_id}}/timer/start",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "{{task_id}}", "timer", "start"]
+            }
+          }
+        },
+        {
+          "name": "Stop Task Timer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/{{task_id}}/timer/stop",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "{{task_id}}", "timer", "stop"]
+            }
+          }
+        },
+        {
+          "name": "Get Timer Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/{{task_id}}/timer/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "{{task_id}}", "timer", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Stats (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "dashboard", "stats"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": ["pm.globals.set(\"dashboardStartTime\", Date.now());"]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Dashboard stats loaded\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.totalProjects).to.not.be.undefined;",
+                  "    ",
+                  "    const endTime = Date.now();",
+                  "    const startTime = pm.globals.get(\"dashboardStartTime\");",
+                  "    const responseTime = endTime - startTime;",
+                  "    console.log(\"Dashboard response time: \" + responseTime + \"ms\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Upcoming Tasks (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/upcoming-tasks?days=7",
+              "host": ["{{base_url}}"],
+              "path": ["api", "dashboard", "upcoming-tasks"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "7"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Recent Activity (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/recent-activity?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "dashboard", "recent-activity"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cache Management",
+      "item": [
+        {
+          "name": "Check Redis Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cache/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Redis is healthy\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.eql(\"UP\");",
+                  "    pm.expect(response.redis).to.eql(\"Connected\");",
+                  "    pm.expect(response.ping).to.eql(\"PONG\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Cache Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cache/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Clear All Caches",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cache/clear",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "clear"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"All caches cleared\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "    console.log(\"Next requests will be cache misses\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Clear Specific Cache",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cache/clear/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "clear", "projects"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cache Performance Tests",
+      "item": [
+        {
+          "name": "Clear Caches (Setup)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cache/clear",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cache", "clear"]
+            }
+          }
+        },
+        {
+          "name": "First Request (Cache Miss)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "dashboard", "stats"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": ["pm.globals.set(\"firstRequestTime\", Date.now());"]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseTime = Date.now() - pm.globals.get(\"firstRequestTime\");",
+                  "pm.globals.set(\"firstResponseTime\", responseTime);",
+                  "console.log(\"First request (cache miss): \" + responseTime + \"ms\");"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Second Request (Cache Hit)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "dashboard", "stats"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": ["pm.globals.set(\"secondRequestTime\", Date.now());"]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseTime = Date.now() - pm.globals.get(\"secondRequestTime\");",
+                  "const firstResponseTime = pm.globals.get(\"firstResponseTime\");",
+                  "",
+                  "console.log(\"Second request (cache hit): \" + responseTime + \"ms\");",
+                  "console.log(\"Performance improvement: \" + (firstResponseTime - responseTime) + \"ms\");",
+                  "",
+                  "pm.test(\"Cache improves performance\", function () {",
+                  "    pm.expect(responseTime).to.be.below(firstResponseTime);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script",
+          "const token = pm.environment.get(\"jwt_token\");",
+          "if (token) {",
+          "    // Add any global token validation logic here",
+          "}",
+          "",
+          "// Add timestamp to requests",
+          "pm.globals.set(\"requestTime\", new Date().toISOString());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script",
+          "pm.test(\"Response status is valid\", function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+          "});",
+          "",
+          "pm.test(\"Response time is acceptable\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "if (pm.response.code === 200) {",
+          "    pm.test(\"Response has correct content type\", function () {",
+          "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    }
+  ]
+}

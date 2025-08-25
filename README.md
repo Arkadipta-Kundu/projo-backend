@@ -1,6 +1,6 @@
 # Projo Backend - Spring Boot Project Management API
 
-A comprehensive project management system backend built with Spring Boot, providing REST APIs for managing projects, tasks, notes, issues, and time tracking.
+A comprehensive project management system backend built with Spring Boot, providing REST APIs for managing projects, tasks, notes, issues, and collaboration features.
 
 ## Features
 
@@ -9,10 +9,13 @@ A comprehensive project management system backend built with Spring Boot, provid
 - **Task Management** - Full CRUD operations with Kanban, Gantt, and Calendar views
 - **Time Tracking** - Start/stop timers for tasks with duration tracking
 - **Issue Management** - Track bugs and issues with conversion to tasks
-- **Notes Management** - Add contextual notes to projects
+- **Notes Management** - Add contextual notes to projects with privacy controls
+- **Collaboration** - Project member invitations and team management
 - **Dashboard** - Real-time statistics and recent activity
+- **Redis Caching** - Performance optimization with Redis cache
+- **Email Notifications** - OTP verification and task reminders
 - **Activity Logging** - Track all user actions
-- **RESTful APIs** - Complete REST API following OpenAPI standards
+- **RESTful APIs** - Complete REST API with Swagger documentation
 
 ## Technology Stack
 
@@ -20,34 +23,54 @@ A comprehensive project management system backend built with Spring Boot, provid
 - **Spring Boot 3.5.5**
 - **Spring Security 6** with JWT authentication
 - **Spring Data JPA** with Hibernate
-- **MySQL 8** database
+- **PostgreSQL** database
+- **Redis** for caching
 - **Maven** for dependency management
 - **Bean Validation** for request validation
+- **Swagger/OpenAPI 3** for API documentation
 
-## Database Setup
+## Quick Start
 
-1. Install MySQL 8.0+
-2. Create a database named `projo_db` (or update `application.properties`)
-3. Update database credentials in `src/main/resources/application.properties`:
+### Prerequisites
+- Java 17 or higher
+- Maven 3.6+
+- PostgreSQL database
+- Redis server
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/projo_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-```
-
-## Installation & Running
+### Local Development Setup
 
 1. **Clone the repository**
-
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Arkadipta-Kundu/projo-backend.git
    cd projo-backend
    ```
 
-2. **Configure database** (see Database Setup above)
+2. **Setup local configuration**
+   ```bash
+   # Copy the template file
+   cp src/main/resources/application.properties.template src/main/resources/application.properties
+   ```
 
-3. **Run the application**
+3. **Configure your local settings**
+   Edit `src/main/resources/application.properties` with your local database and Redis connection details:
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/projo
+   spring.data.redis.url=redis://localhost:6379
+   jwt.secret=YourLocalJWTSecret
+   spring.mail.username=your-email@gmail.com
+   spring.mail.password=your-app-password
+   app.email.from=your-email@gmail.com
+   ```
+
+4. **Run the application**
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
+5. **Access the application**
+   - API: http://localhost:8080
+   - Swagger UI: http://localhost:8080/swagger-ui.html
+   - Health Check: http://localhost:8080/actuator/health
 
    ```bash
    ./mvnw spring-boot:run

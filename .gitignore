@@ -40,6 +40,9 @@ src/main/resources/application-*.properties
 # Ignore environment-specific files
 .env
 *.env
+azure-env-variables.json
+azure-env-variables.env
+azure-cli-setup.sh
 
 # Ignore log files
 logs/

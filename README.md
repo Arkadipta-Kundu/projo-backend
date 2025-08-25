@@ -32,6 +32,7 @@ A comprehensive project management system backend built with Spring Boot, provid
 ## Quick Start
 
 ### Prerequisites
+
 - Java 17 or higher
 - Maven 3.6+
 - PostgreSQL database
@@ -40,12 +41,14 @@ A comprehensive project management system backend built with Spring Boot, provid
 ### Local Development Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Arkadipta-Kundu/projo-backend.git
    cd projo-backend
    ```
 
 2. **Setup local configuration**
+
    ```bash
    # Copy the template file
    cp src/main/resources/application.properties.template src/main/resources/application.properties
@@ -53,6 +56,7 @@ A comprehensive project management system backend built with Spring Boot, provid
 
 3. **Configure your local settings**
    Edit `src/main/resources/application.properties` with your local database and Redis connection details:
+
    ```properties
    spring.datasource.url=jdbc:postgresql://localhost:5432/projo
    spring.data.redis.url=redis://localhost:6379
@@ -63,11 +67,13 @@ A comprehensive project management system backend built with Spring Boot, provid
    ```
 
 4. **Run the application**
+
    ```bash
    ./mvnw spring-boot:run
    ```
 
 5. **Access the application**
+
    - API: http://localhost:8080
    - Swagger UI: http://localhost:8080/swagger-ui.html
    - Health Check: http://localhost:8080/actuator/health
@@ -82,7 +88,7 @@ A comprehensive project management system backend built with Spring Boot, provid
    mvnw.cmd spring-boot:run
    ```
 
-4. **Access the application**
+6. **Access the application**
    - API Base URL: `http://localhost:8080/api`
    - Health Check: `http://localhost:8080/actuator/health`
 
@@ -291,4 +297,5 @@ The application includes comprehensive error handling:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
 # projo-backend

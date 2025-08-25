@@ -10,7 +10,7 @@ import java.util.Objects;
 @Service
 public class CacheService {
 
-    @Autowired
+    @Autowired(required = false)
     private CacheManager cacheManager;
 
     @CacheEvict(value = { "dashboard_stats", "upcoming_tasks", "recent_activity" }, allEntries = true)

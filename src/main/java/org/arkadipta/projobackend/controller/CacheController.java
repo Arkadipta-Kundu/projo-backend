@@ -15,10 +15,10 @@ import java.util.Objects;
 @RequestMapping("/api/cache")
 public class CacheController {
 
-    @Autowired
+    @Autowired(required = false)
     private CacheManager cacheManager;
 
-    @Autowired
+    @Autowired(required = false)
     private RedisConnectionFactory redisConnectionFactory;
 
     @GetMapping("/health")
